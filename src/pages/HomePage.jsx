@@ -3,7 +3,7 @@ import CardNote from "../components/CardNote";
 import axios from "axios";
 import formatData from "../utils/formatDate";
 import { toast } from "react-toastify";
-import EditNoteModal from "../components/EditNoteModal"; // 👈 NUEVO
+
 
 const apiURL = import.meta.env.VITE_API_URL;
 
