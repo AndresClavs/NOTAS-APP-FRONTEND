@@ -25,29 +25,56 @@ const HomePage = () => {
   }, []);
 
   // ✅ FUNCIÓN PARA ELIMINAR NOTA
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "¿Estás seguro de que deseas eliminar esta nota?"
+  const handleDelete = (id) => {
+    toast.warning(
+      ({ closeToast }) => (
+        <div className="flex flex-col gap-3">
+          <span className="font-semibold text-sm">
+            ¿Estás seguro de que deseas eliminar esta nota?
+          </span>
+
+          <div className="flex justify-end gap-3">
+            <button className="btn btn-sm btn-ghost" onClick={closeToast}>
+              Cancelar
+            </button>
+
+            <button
+              className="btn btn-sm btn-error text-white"
+              onClick={async () => {
+                try {
+                  await axios.delete(`${apiURL}/api/notes/${id}`);
+                  setNotes(notes.filter((note) => note._id !== id));
+
+                  toast.success("Nota eliminada correctamente", {
+                    position: "bottom-center",
+                    autoClose: 3000,
+                    theme: "colored",
+                  });
+
+                  closeToast();
+                } catch (error) {
+                  toast.error("Error al eliminar la nota", {
+                    position: "bottom-center",
+                    autoClose: 3000,
+                    theme: "colored",
+                  });
+                  closeToast();
+                }
+              }}
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        position: "bottom-center",
+        autoClose: false,
+        closeOnClick: false,
+        closeButton: false,
+        theme: "colored",
+      }
     );
-    if (!confirmDelete) return;
-
-    try {
-      await axios.delete(`${apiURL}/api/notes/${id}`);
-      setNotes(notes.filter((note) => note._id !== id));
-
-      toast.success("Nota eliminada correctamente", {
-        position: "bottom-center",
-        autoClose: 3000,
-        theme: "colored",
-      });
-    } catch (error) {
-      toast.error("Error al eliminar la nota", {
-        position: "bottom-center",
-        autoClose: 3000,
-        theme: "colored",
-      });
-      console.error(error);
-    }
   };
 
   if (loading) return <span>Cargando...</span>;
