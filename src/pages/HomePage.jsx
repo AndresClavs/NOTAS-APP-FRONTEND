@@ -3,12 +3,17 @@ import CardNote from "../components/CardNote";
 import axios from "axios";
 import formatData from "../utils/formatDate";
 import { toast } from "react-toastify";
+import EditNoteModal from "../components/EditNoteModal"; // 👈 NUEVO
 
 const apiURL = import.meta.env.VITE_API_URL;
 
 const HomePage = () => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // 🆕 ESTADOS PARA EDITAR
+  const [noteToEdit, setNoteToEdit] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,7 +29,7 @@ const HomePage = () => {
     fetchData();
   }, []);
 
-  // ✅ FUNCIÓN PARA ELIMINAR NOTA
+  // ✅ FUNCIÓN PARA ELIMINAR NOTA (YA LA TENÍAS)
   const handleDelete = (id) => {
     toast.warning(
       ({ closeToast }) => (
@@ -77,22 +82,78 @@ const HomePage = () => {
     );
   };
 
+  // 🆕 ABRIR MODAL DE EDICIÓN
+  const handleEdit = (note) => {
+    setNoteToEdit(note);
+    setIsEditing(true);
+  };
+
+  // 🆕 ACTUALIZAR NOTA
+  const handleUpdate = async (updatedNote) => {
+    try {
+      const response = await axios.put(
+        `${apiURL}/api/notes/${updatedNote._id}`,
+        {
+          title: updatedNote.title,
+          description: updatedNote.description,
+        }
+      );
+
+      setNotes(
+        notes.map((note) =>
+          note._id === updatedNote._id ? response.data.note : note
+        )
+      );
+
+      toast.success("Nota actualizada correctamente", {
+        position: "bottom-center",
+        autoClose: 3000,
+        theme: "colored",
+      });
+
+      setIsEditing(false);
+      setNoteToEdit(null);
+    } catch (error) {
+      toast.error("Error al actualizar la nota", {
+        position: "bottom-center",
+        autoClose: 3000,
+        theme: "colored",
+      });
+      console.error(error);
+    }
+  };
+
   if (loading) return <span>Cargando...</span>;
 
   return (
-    <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 xl:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
-      {notes.map((note) => (
-        <CardNote
-          key={note._id}
-          title={note.title}
-          description={note.description}
-          id={note._id}
-          date={formatData(note.createdAt)}
-          onDelete={handleDelete} // 👈 conexión con CardNote
-        />
-      ))}
-    </div>
+    <>
+      <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 xl:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
+        {notes.map((note) => (
+          <CardNote
+            key={note._id}
+            title={note.title}
+            description={note.description}
+            id={note._id}
+            date={formatData(note.createdAt)}
+            onDelete={handleDelete}
+            onEdit={() => handleEdit(note)} // 🆕 EDITAR
+          />
+        ))}
+      </div>
+
+      {/* 🆕 MODAL DE EDICIÓN */}
+      <EditNoteModal
+        note={noteToEdit}
+        isOpen={isEditing}
+        onClose={() => {
+          setIsEditing(false);
+          setNoteToEdit(null);
+        }}
+        onUpdate={handleUpdate}
+      />
+    </>
   );
 };
 
 export default HomePage;
+

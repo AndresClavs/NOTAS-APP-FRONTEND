@@ -1,10 +1,13 @@
-import { Square, SquarePen, Trash } from "lucide-react";
+import { SquarePen, Trash } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const CardNote = ({ title, description, id, date, onDelete }) => {
+  const navigate = useNavigate();
+
   return (
-    <div className="card bg-base-300 w-full ">
+    <div className="card bg-base-300 w-full">
       <div className="card-body">
-        <h2 className="card-title text-accent font-bold lg: text-2xl">
+        <h2 className="card-title text-accent font-bold lg:text-2xl">
           {title}
         </h2>
 
@@ -16,10 +19,15 @@ const CardNote = ({ title, description, id, date, onDelete }) => {
           <time dateTime={date}>{date}</time>
 
           <div className="flex gap-4">
-            <SquarePen className="text-white cursor-pointer" />
+            {/* ✏️ EDITAR */}
+            <SquarePen
+              className="text-white cursor-pointer hover:text-accent transition"
+              onClick={() => navigate(`/editNote/${id}`)}
+            />
 
+            {/* 🗑️ ELIMINAR */}
             <Trash
-              className="text-red-400 cursor-pointer"
+              className="text-red-400 cursor-pointer hover:text-red-600 transition"
               onClick={() => onDelete(id)}
             />
           </div>
@@ -30,4 +38,7 @@ const CardNote = ({ title, description, id, date, onDelete }) => {
 };
 
 export default CardNote;
+
+
+
 
